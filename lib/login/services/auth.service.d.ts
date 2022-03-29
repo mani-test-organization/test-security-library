@@ -1,0 +1,30 @@
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { AuthMapperService } from "./authMapper.service";
+import { EncrDecrService } from './encrDecr.service';
+import { TokenPorviderService } from '../interfaces/token-payload-provider.interface';
+import { ILoginProvider } from "../interfaces/login-provider-interface";
+import { IConfigLibrary } from "../../../config-library.interface";
+import { TokenProviderModel } from "../models/token-payload.model";
+import { LoginUserModel } from '../models/login-user.model';
+import { ResetPasswordModel } from '../models/reset-password.model';
+import * as i0 from "@angular/core";
+export declare class AuthenticationService<UserDetailsType = any, UserRolesType = any> implements ILoginProvider<UserDetailsType, UserRolesType> {
+    private http;
+    private encrDecr;
+    private _authMapperService;
+    private tokenPorviderService;
+    apiURL: string;
+    refreshTokenURL: string;
+    accessTokenURL: string;
+    resetPasswordURL: string;
+    loginType: string;
+    constructor(configLibrary: IConfigLibrary, http: HttpClient, encrDecr: EncrDecrService, _authMapperService: AuthMapperService, tokenPorviderService: TokenPorviderService<UserDetailsType, UserRolesType>);
+    login(user: LoginUserModel): Observable<TokenProviderModel<UserDetailsType, UserRolesType>>;
+    refreshToken(): Observable<Object>;
+    isAuthenticated(): boolean;
+    logOut(): void;
+    resetPassword(email: ResetPasswordModel): Observable<Object>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<AuthenticationService<any, any>, never>;
+    static ɵprov: i0.ɵɵInjectableDeclaration<AuthenticationService<any, any>>;
+}

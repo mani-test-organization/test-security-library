@@ -1,0 +1,32 @@
+import { EventEmitter, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { AuthenticationService } from './services/auth.service';
+import { TokenPorviderService } from './interfaces/token-payload-provider.interface';
+import { MsalService } from '@azure/msal-angular';
+import { AuthAdService } from './services/auth-AD.service';
+import { IConfigLibrary } from '../../config-library.interface';
+import * as i0 from "@angular/core";
+export declare class LoginLibraryComponent implements OnInit {
+    private fb;
+    private authService;
+    private authServiceAD;
+    private tokenPorviderService;
+    private msalService;
+    loginClick: EventEmitter<any>;
+    resetClick: EventEmitter<any>;
+    loginForm: FormGroup;
+    isAuthenticated: boolean;
+    typeLogin: string;
+    isAd: boolean;
+    tokenAd: string;
+    constructor(configLibrary: IConfigLibrary, fb: FormBuilder, authService: AuthenticationService, authServiceAD: AuthAdService, tokenPorviderService: TokenPorviderService, msalService: MsalService);
+    ngOnInit(): void;
+    private loadForm;
+    login(): void;
+    private authUser;
+    loginAD(): void;
+    private authUserAD;
+    recoveryPassEmit(): void;
+    static ɵfac: i0.ɵɵFactoryDeclaration<LoginLibraryComponent, never>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<LoginLibraryComponent, "lib-security-library-login", never, {}, { "loginClick": "loginClick"; "resetClick": "resetClick"; }, never, never>;
+}

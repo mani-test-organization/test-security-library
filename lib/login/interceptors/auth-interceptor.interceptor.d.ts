@@ -1,0 +1,30 @@
+import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Router } from '@angular/router';
+import { IConfigLibrary, IWhiteList } from "../../../config-library.interface";
+import { AuthenticationService } from '../services/auth.service';
+import { TokenProviderModel } from "../models/token-payload.model";
+import { TokenPorviderService } from '../interfaces/token-payload-provider.interface';
+import { EncrDecrService } from '../services/encrDecr.service';
+import { AuthMapperService } from '../services/authMapper.service';
+import * as i0 from "@angular/core";
+export declare class AuthInterceptor implements HttpInterceptor {
+    private router;
+    private tokenPorviderService;
+    private authService;
+    private auth;
+    private encrDecr;
+    private _authMapperService;
+    token: TokenProviderModel<any, any>;
+    whiteList: Array<IWhiteList>;
+    refreshTokenURL: string;
+    accessTokenURL: string;
+    constructor(configLibrary: IConfigLibrary, router: Router, tokenPorviderService: TokenPorviderService, authService: AuthenticationService, auth: AuthenticationService<any, any>, encrDecr: EncrDecrService, _authMapperService: AuthMapperService);
+    intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>>;
+    private isRefreshing;
+    private refreshTokenSubject;
+    private handle401Error;
+    private addTokenHeader;
+    static ɵfac: i0.ɵɵFactoryDeclaration<AuthInterceptor, never>;
+    static ɵprov: i0.ɵɵInjectableDeclaration<AuthInterceptor>;
+}

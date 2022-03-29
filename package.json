@@ -1,0 +1,20 @@
+{
+  "name": "security-library",
+  "version": "0.0.1",
+  "peerDependencies": {
+    "@angular/common": "^12.2.0",
+    "@angular/core": "^12.2.0",
+    "@angular/forms": "~12.2.0",
+    "crypto-js": "^3.1.8"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "main": "bundles/security-library.umd.js",
+  "module": "fesm2015/security-library.js",
+  "es2015": "fesm2015/security-library.js",
+  "esm2015": "esm2015/security-library.js",
+  "fesm2015": "fesm2015/security-library.js",
+  "typings": "security-library.d.ts",
+  "sideEffects": false
+}
