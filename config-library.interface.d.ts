@@ -8,8 +8,6 @@ export declare class IConfigLibrary {
     accessTokenADURL: string;
     resetPasswordURL: string;
     loginType: string;
-    clientId: string;
-    authority: string;
     redirectUri: string;
 }
 export declare class IWhiteList {

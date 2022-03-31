@@ -2,6 +2,7 @@ export * from './lib/security-library.module';
 export * from './lib/login/login-library.component';
 export * from './lib/login/recovery-password/recovery-password.component';
 export * from './lib/login/services/auth.service';
+export * from './lib/login/services/auth-AD.service';
 export * from './lib/login/services/implements/sessionstorage-token-provider.service';
 export * from './lib/login/interceptors/auth-interceptor.interceptor';
 export * from './lib/login/models/login-user.model';

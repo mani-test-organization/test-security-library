@@ -39,16 +39,13 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import * as i6 from '@angular/material/form-field';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import * as i2 from '@angular/router';
 import { map, catchError, switchMap, filter, take } from 'rxjs/operators';
 import * as i1 from '@angular/common/http';
 import * as CryptoJS from 'crypto-js';
 import jwt_decode from 'jwt-decode';
-import * as i5 from '@azure/msal-angular';
-import { MSAL_INSTANCE, MsalService, MsalModule } from '@azure/msal-angular';
-import { PublicClientApplication } from '@azure/msal-browser';
-import { BehaviorSubject, throwError } from 'rxjs';
+import { of, BehaviorSubject, throwError } from 'rxjs';
 import Swal from 'sweetalert2';
-import * as i1$2 from '@angular/router';
 
 const MaterialModules = [
     MatSliderModule,
@@ -212,9 +209,7 @@ const defaultConfigLibrary = {
     accessTokenADURL: 'oauth/tokenAd',
     resetPasswordURL: 'oauth/resetPassword',
     loginType: 'both',
-    clientId: '',
-    authority: '',
-    redirectUri: '',
+    redirectUri: 'https://www.google.com.mx/',
 };
 const CONFIGLIBRARY = new InjectionToken('defaultConfigLibrary');
 
@@ -354,17 +349,10 @@ class AuthAdService {
         this.apiURL = configLibrary.apiURL;
         this.accessTokenURLAD = configLibrary.accessTokenADURL;
     }
-    loginAD(token) {
-        let body = {
-            'token': token
-        };
-        let url = `${this.apiURL}${this.accessTokenURLAD}`;
-        return this.http.post(url, body)
-            .pipe(map((respApi) => {
-            let decodeAcsessToken = this.encrDecr.getDecodedAccessToken(respApi.content.token.accessToken);
-            decodeAcsessToken.DanoneTokenPayload.token = respApi.content.token;
-            return this._authMapperService.transform(decodeAcsessToken.DanoneTokenPayload);
-        }));
+    loginAD(data) {
+        let decodeAcsessToken = this.encrDecr.getDecodedAccessToken(data.content.token.accessToken);
+        decodeAcsessToken.DanoneTokenPayload.token = data.content.token;
+        return of(this._authMapperService.transform(decodeAcsessToken.DanoneTokenPayload));
     }
 }
 AuthAdService.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "12.2.16", ngImport: i0, type: AuthAdService, deps: [{ token: CONFIGLIBRARY }, { token: i1.HttpClient }, { token: EncrDecrService }, { token: AuthMapperService }], target: i0.ɵɵFactoryTarget.Injectable });
@@ -380,23 +368,26 @@ i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "12.2.16", ngImpo
                 }] }, { type: i1.HttpClient }, { type: EncrDecrService }, { type: AuthMapperService }]; } });
 
 class LoginLibraryComponent {
-    constructor(configLibrary, fb, authService, authServiceAD, tokenPorviderService, msalService) {
+    constructor(configLibrary, fb, activatedRoute, authService, authServiceAD, tokenPorviderService) {
         this.fb = fb;
+        this.activatedRoute = activatedRoute;
         this.authService = authService;
         this.authServiceAD = authServiceAD;
         this.tokenPorviderService = tokenPorviderService;
-        this.msalService = msalService;
         this.loginClick = new EventEmitter();
         this.resetClick = new EventEmitter();
         this.isAuthenticated = false;
         this.typeLogin = '';
         this.isAd = false;
         this.tokenAd = '';
+        this.redirectUri = '';
         this.typeLogin = configLibrary.loginType;
+        this.redirectUri = configLibrary.redirectUri;
     }
     ngOnInit() {
         this.loadForm();
         this.typeLogin = this.authService.loginType;
+        //this.loadParamsAD();
     }
     loadForm() {
         this.loginForm = this.fb.group({
@@ -426,36 +417,48 @@ class LoginLibraryComponent {
             this.loginClick.emit(false);
         });
     }
+    //Login AD
+    // public loadParamsAD(){
+    //    this.activatedRoute.queryParams.subscribe(params => {
+    //       const data: any = params || null;
+    //       if (data !== null) {
+    //          const paramsRoute = {
+    //             "content":{
+    //                "token":{
+    //                   "accessToken": data.accessToken,
+    //                   "refreshToken":data.refreshToken
+    //                }
+    //             },
+    //             "msg":null
+    //          }
+    //          this.authServiceAD.loginAD(paramsRoute).subscribe(resp => {
+    //             this.authUserAD(resp);
+    //          },
+    //          error => {
+    //             console.log(error)
+    //             this.loginClick.emit(false)
+    //          });
+    //       }
+    //     });
+    // }
+    // private authUserAD(response) {
+    //    if (response) {
+    //       this.tokenPorviderService.setToken(response);
+    //       this.loginClick.emit(true);
+    //    }
+    //    else {
+    //       this.loginClick.emit(false)
+    //    }
+    // }
     loginAD() {
-        this.isAd = true;
-        this.msalService.loginPopup().subscribe((response) => {
-            this.msalService.instance.setActiveAccount(response.account);
-            this.tokenAd = response.accessToken;
-            this.authUserAD(this.tokenAd);
-        }, error => {
-            console.log('Error: ', error);
-            this.loginClick.emit(false);
-        });
+        window.location.href = `${this.redirectUri}`;
     }
-    authUserAD(token) {
-        this.authServiceAD.loginAD(token).subscribe(response => {
-            if (response) {
-                this.tokenPorviderService.setToken(response);
-                this.loginClick.emit(true);
-            }
-            else {
-                this.loginClick.emit(false);
-            }
-        }, error => {
-            console.log(error);
-            this.loginClick.emit(false);
-        });
-    }
+    //Reset Password
     recoveryPassEmit() {
         this.resetClick.emit(true);
     }
 }
-LoginLibraryComponent.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "12.2.16", ngImport: i0, type: LoginLibraryComponent, deps: [{ token: CONFIGLIBRARY }, { token: i1$1.FormBuilder }, { token: AuthenticationService }, { token: AuthAdService }, { token: TokenPorviderService }, { token: i5.MsalService }], target: i0.ɵɵFactoryTarget.Component });
+LoginLibraryComponent.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "12.2.16", ngImport: i0, type: LoginLibraryComponent, deps: [{ token: CONFIGLIBRARY }, { token: i1$1.FormBuilder }, { token: i2.ActivatedRoute }, { token: AuthenticationService }, { token: AuthAdService }, { token: TokenPorviderService }], target: i0.ɵɵFactoryTarget.Component });
 LoginLibraryComponent.ɵcmp = i0.ɵɵngDeclareComponent({ minVersion: "12.0.0", version: "12.2.16", type: LoginLibraryComponent, selector: "lib-security-library-login", outputs: { loginClick: "loginClick", resetClick: "resetClick" }, ngImport: i0, template: "<div class=\"container\">\r\n  <div class=\"row form-content justify-content-start align-items-center\">\r\n    <form [formGroup]=\"loginForm\" >\r\n      <div class=\"col col-xl-4 col-lg-8 col-md-8 col-12\">\r\n        <div class=\"container-fluid\">\r\n          <div *ngIf=\"typeLogin !== 'internal'\" class=\"row\">\r\n            <div class=\"col col-12\">\r\n              <mat-label>Correo\r\n              </mat-label>\r\n              <mat-form-field [style.fontSize.px]=\"12\" appearance=\"outline\">\r\n                <mat-label>ejemplo@corrreo.com\r\n                </mat-label>\r\n                <mat-icon matSuffix>email</mat-icon>\r\n                <input \r\n                  matInput \r\n                  type=\"text\" \r\n                  placeholder=\"ejemplo@corrreo.com\" \r\n                  maxlength=\"50\" \r\n                  formControlName=\"userName\" \r\n                  name=\"userName\" \r\n                  id=\"userName\" \r\n                  required>\r\n                  \r\n                <mat-error *ngIf=\"loginForm.get('userName')?.hasError('required') && loginForm.get('userName')?.touched\">\r\n                  Campo requerido\r\n                </mat-error>\r\n              </mat-form-field>\r\n            </div>\r\n            <div class=\"col col-12\">\r\n              <mat-label>Contrase\u00F1a</mat-label>\r\n              <mat-form-field [style.fontSize.px]=\"12\" appearance=\"outline\">\r\n                <mat-label>contrase\u00F1a</mat-label>\r\n                <mat-icon matSuffix>vpn_key</mat-icon>\r\n                <input \r\n                  matInput \r\n                  type=\"password\" \r\n                  placeholder=\"Contrase\u00F1a\" \r\n                  maxlength=\"50\" \r\n                  formControlName=\"password\" \r\n                  name=\"password\" \r\n                  id=\"passwor\" \r\n                  required>\r\n                <mat-error *ngIf=\"loginForm.get('password')?.hasError('required') && loginForm.get('password')?.touched\">\r\n                  Campo requerido\r\n                </mat-error>\r\n              </mat-form-field>\r\n            </div>\r\n            <div class=\"row recovery-pass\">\r\n              <div class=\"col col-12\">\r\n                <button mat-button class=\"btn_tertiary\" (click)=\"recoveryPassEmit()\">Olvide mi contrase\u00F1a</button>\r\n              </div>\r\n            </div>\r\n            <div class=\"col col-12 text-center\">\r\n              <button class=\"btn_primary\" (click)=\"login()\">Iniciar sesi\u00F3n</button>\r\n            </div> \r\n          </div>\r\n          <div *ngIf=\"typeLogin !== 'external'\" class=\"col col-12 text-center\">\r\n            <button mat-button class=\"btn_tertiary\" (click)=\"loginAD()\">Ingresar con Active Directory</button>\r\n          </div>\r\n        </div>\r\n      </div>\r\n    </form>   \r\n  </div>\r\n</div>", styles: [".btn_primary{color:#f8f9fb;text-transform:initial;text-align:center;background-color:#214eb7;text-decoration:none;border:0;border-radius:8px;cursor:pointer;letter-spacing:1.5px;width:100%!important;height:40px;padding:10px 8px;font-size:14px;font-weight:400}.btn_primary:hover{background-color:#01818f}.btn_primary:disabled{color:#828282;background-color:#b0b0b0;pointer-events:none}.btn_secondary{color:#01818f;text-transform:initial;text-align:center;background-color:#ecfafc;text-decoration:none;border:1px solid #0095A8;border-radius:8px;cursor:pointer;letter-spacing:1.5px;width:150px!important;height:40px;padding:10px 8px;font-size:14px;font-weight:400}.btn_secondary:hover{background-color:#b2eaf333}.btn_secondary:disabled{color:#b0b0b0;background-color:#e9e9e9;border:1px solid #e9e9e9;pointer-events:none}.btn_tertiary{color:#214eb7}.bg_breadcrumb{background:url(/assets/img/bg_breadcrumb.png) no-repeat;background-color:#005db4;background-size:contain;height:72px;padding-left:30px}.bg_breadcrumb .breadcrumb{color:#fff;margin:0;padding:0;font-style:normal;font-weight:600;letter-spacing:.02em;text-transform:capitalize;vertical-align:middle;line-height:58px}.bg_breadcrumb .breadcrumb span{font-size:18px;color:#bcd}.bg_breadcrumb .breadcrumb span:hover{color:#01818f;text-decoration:none}.bg_breadcrumb .breadcrumb li{list-style:none;float:left;margin:5px}.bg_breadcrumb .breadcrumb li:last-child{margin-right:5px}.bg_breadcrumb .breadcrumb li:after{content:\" > \";color:#fff}.bg_breadcrumb .breadcrumb li:last-child:after{content:\"\"}h1{font-size:34px;font-weight:500}h2{font-size:24px;font-weight:500}h3{font-size:20px;font-weight:500}h4{font-size:18px;font-weight:400}h5{font-style:normal!important;font-weight:500!important;font-size:12px!important;line-height:18px!important;letter-spacing:.15px!important;color:#3f4b6c!important}a{color:#118584}.swal2-styled.swal2-confirm{background-color:#0095a8!important}.swal2-styled.swal2-confirm:focus{box-shadow:none!important}.bg_evidence{background:rgba(249,249,249,.55);border:.5px solid #eceff2;box-sizing:border-box;height:261px;padding-left:25px;margin-left:25px;margin-right:25px}.date_evidence{font-style:normal;font-weight:500;font-size:12px;line-height:18px;text-align:center;letter-spacing:.155002px;color:#7792ac}.rb_evidence{display:flex;flex-direction:column;margin:15px 0;width:150px}.container_evidence{margin:4px,4px;padding:4px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;width:100%}.card_evidence{width:170px;text-align:center}.lbl_evidence{font-style:normal;font-weight:500;font-size:12px;line-height:18px;letter-spacing:.15px;color:#3f4b6c}.mat-form-field-no-padding .mat-form-field-wrapper{margin-top:-.5em}.mobile-label{display:none}.mobile-cantidad>input{width:80%}@media (max-width: 600px){.mobile-label{width:130px;display:inline-block;font-weight:bold}.mat-header-row{display:none}.mat-row{flex-direction:column;align-items:start;text-align:left;padding:8px 24px}.mat-cell:first-of-type{padding:5px 10px!important}.mobile-cantidad{width:150px}}.container .form-content .title{font-family:var(--font-poppins-bold);font-style:normal;font-weight:500;font-size:26px;line-height:39px;text-transform:uppercase;color:#9399b2}.container mat-form-field.mat-form-field{width:100%;font-size:16px;color:#9399b2}.container mat-label{font-family:var(--font-roboto);font-style:normal;font-weight:700;font-size:14px;line-height:14px;letter-spacing:.15px;color:#656d8e}.text-center{display:grid}.recovery-pass{text-align:right}.login_title{font-family:\"Poppins\",\"Roboto\",sans-serif;font-style:normal;font-weight:500;font-size:26px;line-height:39px;text-transform:uppercase;color:#f8f9fb}.login_label{font-family:\"Roboto\",sans-serif;font-style:normal;font-weight:bold;font-size:12px;line-height:14px;letter-spacing:.15px;color:#f8f9fb}input::placeholder{font-family:\"Roboto\",sans-serif;font-style:normal;font-weight:500;font-size:14px;line-height:16px;letter-spacing:.15px;color:#9eb7cc}input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus,input:-webkit-autofill:active{-webkit-transition:background-color 5000s;transition:background-color 5000s;-webkit-text-fill-color:#656D8E!important}\n"], components: [{ type: i6.MatFormField, selector: "mat-form-field", inputs: ["color", "floatLabel", "appearance", "hideRequiredMarker", "hintLabel"], exportAs: ["matFormField"] }, { type: i7.MatIcon, selector: "mat-icon", inputs: ["color", "inline", "svgIcon", "fontSet", "fontIcon"], exportAs: ["matIcon"] }, { type: i8.MatButton, selector: "button[mat-button], button[mat-raised-button], button[mat-icon-button],             button[mat-fab], button[mat-mini-fab], button[mat-stroked-button],             button[mat-flat-button]", inputs: ["disabled", "disableRipple", "color"], exportAs: ["matButton"] }], directives: [{ type: i1$1.ɵNgNoValidate, selector: "form:not([ngNoForm]):not([ngNativeValidate])" }, { type: i1$1.NgControlStatusGroup, selector: "[formGroupName],[formArrayName],[ngModelGroup],[formGroup],form:not([ngNoForm]),[ngForm]" }, { type: i1$1.FormGroupDirective, selector: "[formGroup]", inputs: ["formGroup"], outputs: ["ngSubmit"], exportAs: ["ngForm"] }, { type: i9.NgIf, selector: "[ngIf]", inputs: ["ngIf", "ngIfThen", "ngIfElse"] }, { type: i6.MatLabel, selector: "mat-label" }, { type: i6.MatSuffix, selector: "[matSuffix]" }, { type: i10.MatInput, selector: "input[matInput], textarea[matInput], select[matNativeControl],      input[matNativeControl], textarea[matNativeControl]", inputs: ["id", "disabled", "required", "type", "value", "readonly", "placeholder", "errorStateMatcher", "aria-describedby"], exportAs: ["matInput"] }, { type: i1$1.DefaultValueAccessor, selector: "input:not([type=checkbox])[formControlName],textarea[formControlName],input:not([type=checkbox])[formControl],textarea[formControl],input:not([type=checkbox])[ngModel],textarea[ngModel],[ngDefaultControl]" }, { type: i1$1.MaxLengthValidator, selector: "[maxlength][formControlName],[maxlength][formControl],[maxlength][ngModel]", inputs: ["maxlength"] }, { type: i1$1.NgControlStatus, selector: "[formControlName],[ngModel],[formControl]" }, { type: i1$1.FormControlName, selector: "[formControlName]", inputs: ["disabled", "formControlName", "ngModel"], outputs: ["ngModelChange"] }, { type: i1$1.RequiredValidator, selector: ":not([type=checkbox])[required][formControlName],:not([type=checkbox])[required][formControl],:not([type=checkbox])[required][ngModel]", inputs: ["required"] }, { type: i6.MatError, selector: "mat-error", inputs: ["id"] }] });
 i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "12.2.16", ngImport: i0, type: LoginLibraryComponent, decorators: [{
             type: Component,
@@ -467,7 +470,7 @@ i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "12.2.16", ngImpo
         }], ctorParameters: function () { return [{ type: IConfigLibrary, decorators: [{
                     type: Inject,
                     args: [CONFIGLIBRARY]
-                }] }, { type: i1$1.FormBuilder }, { type: AuthenticationService }, { type: AuthAdService }, { type: TokenPorviderService }, { type: i5.MsalService }]; }, propDecorators: { loginClick: [{
+                }] }, { type: i1$1.FormBuilder }, { type: i2.ActivatedRoute }, { type: AuthenticationService }, { type: AuthAdService }, { type: TokenPorviderService }]; }, propDecorators: { loginClick: [{
                 type: Output
             }], resetClick: [{
                 type: Output
@@ -552,26 +555,8 @@ i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "12.2.16", ngImpo
                 }]
         }] });
 
-function MSALInstanceFactory() {
-    return new PublicClientApplication({
-        auth: {
-            clientId: defaultConfigLibrary.clientId,
-            authority: defaultConfigLibrary.authority,
-            redirectUri: defaultConfigLibrary.redirectUri,
-        }
-    });
-}
 class SecurityLibraryModule {
     static withProviders(configLib) {
-        function MSALInstanceFactoryEnv() {
-            return new PublicClientApplication({
-                auth: {
-                    clientId: configLib.clientId,
-                    authority: configLib.authority,
-                    redirectUri: configLib.redirectUri,
-                }
-            });
-        }
         return {
             ngModule: SecurityLibraryModule,
             providers: [
@@ -580,9 +565,7 @@ class SecurityLibraryModule {
                 },
                 {
                     provide: TokenPorviderService, useExisting: SessionstorageTokenProviderService
-                },
-                { provide: MSAL_INSTANCE, useFactory: MSALInstanceFactoryEnv },
-                MsalService
+                }
             ]
         };
     }
@@ -595,22 +578,18 @@ SecurityLibraryModule.ɵmod = i0.ɵɵngDeclareNgModule({ minVersion: "12.0.0", v
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        MaterialUiModule,
-        MsalModule], exports: [LoginLibraryComponent,
+        MaterialUiModule], exports: [LoginLibraryComponent,
         RecoveryPasswordComponent] });
 SecurityLibraryModule.ɵinj = i0.ɵɵngDeclareInjector({ minVersion: "12.0.0", version: "12.2.16", ngImport: i0, type: SecurityLibraryModule, providers: [
         { provide: CONFIGLIBRARY, useValue: defaultConfigLibrary },
-        { provide: TokenPorviderService, useValue: SessionstorageTokenProviderService },
-        { provide: MSAL_INSTANCE, useFactory: MSALInstanceFactory },
-        MsalService
+        { provide: TokenPorviderService, useValue: SessionstorageTokenProviderService }
     ], imports: [[
             // BrowserModule,
             // BrowserAnimationsModule,
             CommonModule,
             FormsModule,
             ReactiveFormsModule,
-            MaterialUiModule,
-            MsalModule
+            MaterialUiModule
         ]] });
 i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "12.2.16", ngImport: i0, type: SecurityLibraryModule, decorators: [{
             type: NgModule,
@@ -625,8 +604,7 @@ i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "12.2.16", ngImpo
                         CommonModule,
                         FormsModule,
                         ReactiveFormsModule,
-                        MaterialUiModule,
-                        MsalModule
+                        MaterialUiModule
                     ],
                     exports: [
                         LoginLibraryComponent,
@@ -634,9 +612,7 @@ i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "12.2.16", ngImpo
                     ],
                     providers: [
                         { provide: CONFIGLIBRARY, useValue: defaultConfigLibrary },
-                        { provide: TokenPorviderService, useValue: SessionstorageTokenProviderService },
-                        { provide: MSAL_INSTANCE, useFactory: MSALInstanceFactory },
-                        MsalService
+                        { provide: TokenPorviderService, useValue: SessionstorageTokenProviderService }
                     ]
                 }]
         }] });
@@ -734,14 +710,14 @@ class AuthInterceptor {
         });
     }
 }
-AuthInterceptor.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "12.2.16", ngImport: i0, type: AuthInterceptor, deps: [{ token: CONFIGLIBRARY }, { token: i1$2.Router }, { token: TokenPorviderService }, { token: AuthenticationService }, { token: AuthenticationService }, { token: EncrDecrService }, { token: AuthMapperService }], target: i0.ɵɵFactoryTarget.Injectable });
+AuthInterceptor.ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "12.2.16", ngImport: i0, type: AuthInterceptor, deps: [{ token: CONFIGLIBRARY }, { token: i2.Router }, { token: TokenPorviderService }, { token: AuthenticationService }, { token: AuthenticationService }, { token: EncrDecrService }, { token: AuthMapperService }], target: i0.ɵɵFactoryTarget.Injectable });
 AuthInterceptor.ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "12.2.16", ngImport: i0, type: AuthInterceptor });
 i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "12.2.16", ngImport: i0, type: AuthInterceptor, decorators: [{
             type: Injectable
         }], ctorParameters: function () { return [{ type: IConfigLibrary, decorators: [{
                     type: Inject,
                     args: [CONFIGLIBRARY]
-                }] }, { type: i1$2.Router }, { type: TokenPorviderService }, { type: AuthenticationService }, { type: AuthenticationService }, { type: EncrDecrService }, { type: AuthMapperService }]; } });
+                }] }, { type: i2.Router }, { type: TokenPorviderService }, { type: AuthenticationService }, { type: AuthenticationService }, { type: EncrDecrService }, { type: AuthMapperService }]; } });
 
 class LoginUserModel {
 }
@@ -774,5 +750,5 @@ class RFCExcludedModel {
  * Generated bundle index. Do not edit.
  */
 
-export { AuthInterceptor, AuthenticationService, CONFIGLIBRARY, CompanyModel, FunctionModel, IConfigLibrary, IWhiteList, LoginLibraryComponent, LoginUserModel, MSALInstanceFactory, PaymentPeriodicityModel, RFCExcludedModel, RecoveryPasswordComponent, SecurityLibraryModule, SessionstorageTokenProviderService, TokenModel, TokenPorviderService, TokenProviderModel, UserDetailModel, UserRolesModel, defaultConfigLibrary };
+export { AuthAdService, AuthInterceptor, AuthenticationService, CONFIGLIBRARY, CompanyModel, FunctionModel, IConfigLibrary, IWhiteList, LoginLibraryComponent, LoginUserModel, PaymentPeriodicityModel, RFCExcludedModel, RecoveryPasswordComponent, SecurityLibraryModule, SessionstorageTokenProviderService, TokenModel, TokenPorviderService, TokenProviderModel, UserDetailModel, UserRolesModel, defaultConfigLibrary };
 //# sourceMappingURL=security-library.js.map

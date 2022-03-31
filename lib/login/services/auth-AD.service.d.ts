@@ -15,7 +15,7 @@ export declare class AuthAdService<UserDetailsType = any, UserRolesType = any> i
     accessTokenURLAD: string;
     typeLogin?: string;
     constructor(configLibrary: IConfigLibrary, http: HttpClient, encrDecr: EncrDecrService, _authMapperService: AuthMapperService);
-    loginAD(token: string): Observable<TokenProviderModel<UserDetailsType, UserRolesType>>;
+    loginAD(data: any): Observable<TokenProviderModel<UserDetailsType, UserRolesType>>;
     static ɵfac: i0.ɵɵFactoryDeclaration<AuthAdService<any, any>, never>;
     static ɵprov: i0.ɵɵInjectableDeclaration<AuthAdService<any, any>>;
 }
