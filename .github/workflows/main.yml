@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: 14.0.0
           registry-url: https://npm.pkg.github.com/
-          scope: 'AngelMaCa'
+          scope: '@AngelMaCa'
       - name: Publish to GitHub Package Registry
         run: npm install && npm publish
         env:
