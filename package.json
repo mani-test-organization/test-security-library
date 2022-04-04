@@ -1,5 +1,5 @@
 {
-  "name": "test-security-library",
+  "name": "@AngelMaCa/test-security-library",
   "version": "0.0.1",
   "peerDependencies": {
     "@angular/common": "^12.2.0",
