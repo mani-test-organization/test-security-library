@@ -13,6 +13,7 @@ jobs:
           node-version: 14.0.0
           registry-url: https://registry.npmjs.org/
           scope: '@AngelMaCa'
+      - run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_AUTH_TOKEN }}" > ~/.npmrc
       - run: npm install
       - run: npm publish --access public
         env:
