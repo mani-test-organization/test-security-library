@@ -5,7 +5,6 @@ export declare class IConfigLibrary {
     apiURL: string;
     refreshTokenURL: string;
     accessTokenURL: string;
-    accessTokenADURL: string;
     resetPasswordURL: string;
     loginType: string;
     redirectUri: string;

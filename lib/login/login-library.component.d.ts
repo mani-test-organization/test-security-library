@@ -2,15 +2,11 @@ import { EventEmitter, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { AuthenticationService } from './services/auth.service';
 import { TokenPorviderService } from './interfaces/token-payload-provider.interface';
-import { AuthAdService } from './services/auth-AD.service';
 import { IConfigLibrary } from '../../config-library.interface';
-import { ActivatedRoute } from '@angular/router';
 import * as i0 from "@angular/core";
 export declare class LoginLibraryComponent implements OnInit {
     private fb;
-    private activatedRoute;
     private authService;
-    private authServiceAD;
     private tokenPorviderService;
     loginClick: EventEmitter<any>;
     resetClick: EventEmitter<any>;
@@ -20,7 +16,7 @@ export declare class LoginLibraryComponent implements OnInit {
     isAd: boolean;
     tokenAd: string;
     redirectUri: string;
-    constructor(configLibrary: IConfigLibrary, fb: FormBuilder, activatedRoute: ActivatedRoute, authService: AuthenticationService, authServiceAD: AuthAdService, tokenPorviderService: TokenPorviderService);
+    constructor(configLibrary: IConfigLibrary, fb: FormBuilder, authService: AuthenticationService, tokenPorviderService: TokenPorviderService);
     ngOnInit(): void;
     private loadForm;
     login(): void;

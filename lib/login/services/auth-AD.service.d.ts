@@ -12,7 +12,6 @@ export declare class AuthAdService<UserDetailsType = any, UserRolesType = any> i
     private _authMapperService;
     apiURL: string;
     refreshTokenURL?: string;
-    accessTokenURLAD: string;
     typeLogin?: string;
     constructor(configLibrary: IConfigLibrary, http: HttpClient, encrDecr: EncrDecrService, _authMapperService: AuthMapperService);
     loginAD(data: any): Observable<TokenProviderModel<UserDetailsType, UserRolesType>>;
