@@ -1,5 +1,5 @@
 {
-  "name": "@angelmaca/test-security-library",
+  "name": "@mani-test-organization/test-security-library",
   "version": "0.0.1",
   "peerDependencies": {
     "@angular/common": "^12.2.0",
@@ -18,7 +18,7 @@
   "typings": "security-library.d.ts",
   "sideEffects": false,
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com/@AngelMaCa"
+    "registry": "https://npm.pkg.github.com/@mani-test-organization"
   },
-  "repository": "https://github.com/AngelMaCa/test-security-library"
+  "repository": "https://github.com/mani-test-organization/test-security-library"
 }
